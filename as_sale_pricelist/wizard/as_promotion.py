@@ -117,7 +117,7 @@ class asSaleOrderPromoWizard(models.Model):
                                 # 'as_precio_proveedor':so_line_obj.product_id.as_last_purchase_price,
                                 'as_descuento': discount,
                                 'RECALCULATED_PRICE_UNIT': (C57-(C57*G55/100)),
-                                'RECALCULATED_COST_NIMAX_USD': (C58-(C57*H55/100)),
+                                'RECALCULATED_COST_NIMAX_USD': (C57-(C57*H55/100)),
                             })
 
                             promo_list.append(wz_line_id.id)

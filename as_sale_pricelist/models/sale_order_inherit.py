@@ -10,7 +10,7 @@ class SaleOrderLine(models.Model):
     _inherit="sale.order.line"
     
     margin2 = fields.Float('Margen 2', digits='Product Price', default=0)
-    as_pricelist_id = fields.Many2one('product.pricelist', string='Lista de Precios',required=True)
+    as_pricelist_id = fields.Many2one('product.pricelist', string='Lista de Precios',readonly=True,store=True)
 
     RECALCULATED_PRICE_UNIT = fields.Float('RECALCULATED PRICE UNIT')
     NIMAX_PRICE_MXP = fields.Float('NIMAX PRICE MXP')
@@ -93,7 +93,7 @@ class SaleOrder(models.Model):
     as_margin = fields.Float(string='Margen(en %)', store=True, readonly=True, compute='_amount_all_marigin', tracking=4)
     as_aprobe = fields.Boolean(string='Aporbar Venta',default=False)
 
-    @api.depends('order_line.price_unit','order_line.product_uom_qty')
+    @api.depends('order_line.price_unit','order_line.product_uom_qty','order_line.COST_NIMAX_USD')
     def _amount_all_marigin(self):
         total_price = 0.0
         total_cost = 0.0
@@ -109,8 +109,8 @@ class SaleOrder(models.Model):
                 total_price += price * line.product_uom_qty
                 total_cost += line.COST_NIMAX_USD * line.product_uom_qty
                 line.get_margin_utilidad()
-                if total_price > 0:
-                    total_margin += (total_price-total_cost)/total_price
+            if total_price > 0:
+                total_margin += (total_price-total_cost)/total_price
             order.update({
                 'as_margin': total_margin*100,
             })
@@ -159,7 +159,7 @@ class SaleOrder(models.Model):
                 return action  
             elif (float(self.as_margin) < float(margin_global)):
                 raise ValidationError('No se puede confirmar la venta, modifique sus precios')
-
+        product=[]
         res = super(SaleOrder, self).action_confirm()
 
         for rec in self:
@@ -177,6 +177,13 @@ class SaleOrder(models.Model):
                 tf_history_id = self.env['tf.history.promo'].search([('sale_id', '=', rec.id),('product_id', '=', line.product_id.id)], order='create_date desc', limit=1)
                 if tf_history_id:
                     tf_history_id.last_applied_promo = True
+            for line in rec.order_line:
+                if not line.as_pricelist_id:
+                    product.append(line.product_id.name)
+        if product != []:
+            raise ValidationError('EXISTEN LINEAS PRODUCTO SIN PRECIO BASE : %s' % str(product))
+                
+
         return res
 
     def action_cancel(self):
