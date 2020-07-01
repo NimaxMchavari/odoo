@@ -11,7 +11,7 @@ class SaleOrderLine(models.Model):
     
     margin2 = fields.Float('Margen 2', digits='Product Price', default=0)
     as_pricelist_id = fields.Many2one('product.pricelist', string='Lista de Precios',readonly=True,store=True)
-
+    as_log_price = fields.Boolean('Log de price Unit',default=True)
     RECALCULATED_PRICE_UNIT = fields.Float('RECALCULATED PRICE UNIT')
     NIMAX_PRICE_MXP = fields.Float('NIMAX PRICE MXP')
     COST_NIMAX_USD = fields.Float('COST NIMAX USD')
@@ -77,6 +77,8 @@ class SaleOrderLine(models.Model):
                 sale_line.get_margin_porcentaje()
                 sale_line.TOTAL_MXP = sale_line.price_unit * sale_line.product_uom_qty
                 sale_line.TOTAL_USD = moneda_mxn._convert(sale_line.TOTAL_MXP,moneda_usd, self.env.user.company_id, fields.Date.today())
+                sale_line.RECALCULATED_PRICE_UNIT = moneda_mxn._convert(sale_line.price_unit, moneda_usd,self.env.user.company_id, fields.Date.today())
+                sale_line.NIMAX_PRICE_MXP = sale_line.price_unit
             else:
                 new_amrgin= (sale_line.price_unit*sale_line.product_uom_qty)-(sale_line.COST_NIMAX_USD*sale_line.product_uom_qty)
                 sale_line.MARGIN_USD=new_amrgin
@@ -84,6 +86,38 @@ class SaleOrderLine(models.Model):
                 sale_line.get_margin_porcentaje()
                 sale_line.TOTAL_USD = sale_line.price_unit * sale_line.product_uom_qty
                 sale_line.TOTAL_MXP = moneda_usd._convert(sale_line.TOTAL_USD,moneda_mxn, self.env.user.company_id, fields.Date.today())
+                sale_line.RECALCULATED_PRICE_UNIT = sale_line.price_unit
+                sale_line.NIMAX_PRICE_MXP = moneda_usd._convert(sale_line.price_unit,moneda_mxn, self.env.user.company_id, fields.Date.today())
+            tf_partner_id = self.env['tf.res.partner']
+            for x in sale_line.order_id.partner_id.tf_vendor_parameter_ids:
+                if x.category_id.id == sale_line.product_id.categ_id.id:
+                    tf_partner_id = x
+            if sale_line.as_pricelist_id and sale_line.as_log_price:
+                self.env['tf.history.promo'].create(dict(
+                    # promotion_id=,
+                    vendor_id=tf_partner_id.partner_id.id,
+                    product_id=sale_line.product_id.id,
+                    customer_id=sale_line.order_id.partner_id.id,
+                    customer_type=tf_partner_id.partner_type.id,
+                    as_pricelist_id = sale_line.as_pricelist_id.id,
+                    category_id=sale_line.product_id.categ_id.id,
+                    qty=sale_line.product_uom_qty,
+                    recalculated_price_unit=sale_line.RECALCULATED_PRICE_UNIT,
+                    recalculated_price_unit_mxp=sale_line.NIMAX_PRICE_MXP,
+                    recalculated_cost_nimax_usd=sale_line.COST_NIMAX_USD,
+                    recalculated_cost_nimax_mxp=sale_line.COST_NIMAX_MXP,
+                    margin_mxp=sale_line.MARGIN_MXP,
+                    margin_usd=sale_line.MARGIN_USD,
+                    total_usd=sale_line.TOTAL_USD,
+                    total_mxp=sale_line.TOTAL_MXP,
+                    # last_applied_promo=,
+                    salesman_id=sale_line.order_id.user_id.id,
+
+                    sale_id=sale_line.order_id.id,
+                ))
+            sale_line.as_log_price=True
+
+
             
 
 class SaleOrder(models.Model):

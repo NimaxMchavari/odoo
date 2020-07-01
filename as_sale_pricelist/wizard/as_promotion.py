@@ -362,6 +362,7 @@ class as_SaleOrderPromoWizardLine(models.Model):
             data_update.update({
                 'price_unit': precio_nimax,
                 'COST_NIMAX_USD': self.RECALCULATED_COST_NIMAX_USD,
+                'as_log_price': False,
             })
             self.line_id.write(data_update)
             self.env['tf.history.promo'].create({
