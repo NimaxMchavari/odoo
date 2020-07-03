@@ -18,7 +18,7 @@ class as_accountinvoice(models.Model):
             """)
         #_logger.debug(query_movements)
         self.env.cr.execute(query_movements)
-        ids = [k for k in self.env.cr.fetchone()] 
+        ids = [k for k in self.env.cr.fetchall()]
         name= ''
         if ids != []:
             line = self.env['sale.order.line'].search([('id','in',ids)],limit=1)
