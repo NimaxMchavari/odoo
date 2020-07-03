@@ -182,7 +182,14 @@ class SaleOrder(models.Model):
         margin_minimo = self.env['ir.config_parameter'].sudo().get_param('as_sale_pricelist.as_margin_minimo')
         margin_global = self.env['ir.config_parameter'].sudo().get_param('as_sale_pricelist.as_margin_global')
         if self.as_aprobe == False:
-            if (self.as_margin > 0) and (self.as_margin < float(margin_minimo)):
+            access = False
+            no_access = False
+            for line in self.order_line:
+                if (line.as_margin_porcentaje  > 0) and (line.as_margin_porcentaje  < float(margin_minimo)):
+                    access= True
+                elif (float(line.as_margin_porcentaje) < float(margin_global)):
+                    no_access = True
+            if access:
                 action = self.env.ref('as_sale_pricelist.action_aprobe_sales_qweb').read()[0]
                 action.update({
                     'context': {
@@ -191,7 +198,7 @@ class SaleOrder(models.Model):
                     },
                 })
                 return action  
-            elif (float(self.as_margin) < float(margin_global)):
+            elif no_access:
                 raise ValidationError('No se puede confirmar la venta, modifique sus precios')
         product=[]
         res = super(SaleOrder, self).action_confirm()
