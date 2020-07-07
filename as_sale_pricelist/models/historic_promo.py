@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
-
+from datetime import date, datetime, time
+import logging
+import base64
+_logger = logging.getLogger(__name__)
 class tfResPartner(models.Model):
     _name = "tf.history.promo"
 
@@ -26,7 +29,7 @@ class tfResPartner(models.Model):
     as_pricelist_id = fields.Many2one('product.pricelist', string='Tarifa')
 
     sale_id = fields.Many2one('sale.order', 'Sale Order')
-    fecha_venta = fields.Datetime(string='Fecha Venta', compute="_get_invoiced_ver")
+    fecha_venta = fields.Datetime(string='Fecha Venta', compute="_get_invoiced_ver",store=True)
     promo_id = fields.Many2one('sale.coupon.program', 'Promotion')
 
     sale_order_line = fields.Many2one('sale.order.line')
@@ -43,6 +46,7 @@ class tfResPartner(models.Model):
 
             else:
                 history.invoice_ids = []
-                history.fecha_venta =fields.Datetime.now
+                history.fecha_venta = datetime.now()
 
-    invoice_ids = fields.Many2many("account.move", string='Facturas de Cliente', compute="_get_invoiced_ver")
+    invoice_ids = fields.Many2many("account.move", string='Facturas de Cliente', compute="_get_invoiced_ver",store=True)
+    invoice_name = fields.Char(string='Facturas de Cliente', related='invoice_ids.name',store=True)

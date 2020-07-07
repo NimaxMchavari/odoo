@@ -83,6 +83,9 @@
                             </group>
                             <group id="header_left_group">
                                 <field name="margin_mxp"/>
+                            </group>                            
+                            <group id="header_left_group">
+                                <field name="invoice_name"/>
                             </group>
                             <group id="header_left_group">
                                 <field name="margin_usd"/>
@@ -112,7 +115,17 @@
                 </form>
             </field>
         </record>
-
+        <record id="view_account_invoice_ids_filter" model="ir.ui.view">
+            <field name="name">tf.history.promo.search</field>
+            <field name="model">tf.history.promo</field>
+            <field name="arch" type="xml">
+                <search string="buscar">
+                    <group expand="0" string="Group By">
+                        <filter string="Factura de cliente" name="group_by_invoice_ids" domain="[]" context="{'group_by': 'invoice_name'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
         <record model="ir.actions.act_window" id="tf_history_promo_action_window">
             <field name="name">History Promo</field>
             <field name="res_model">tf.history.promo</field>
