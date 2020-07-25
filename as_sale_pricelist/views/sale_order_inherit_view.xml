@@ -8,10 +8,11 @@
 		<field name="priority">55</field>
 		<field name="arch" type="xml">
 			<xpath expr="//notebook//page[@name='order_lines']/field[@name='order_line']/tree/field[@name='price_total']" position="after">
-				<button name="promo_apply" type="object" string="Promo" icon="fa-percent" context="{'as_pricelist_id': as_pricelist_id }"/>
+			  <field name="as_product_comisionable" invisible="1"/>
+				<button name="promo_apply" type="object" attrs="{'invisible': [('as_product_comisionable', '!=', False)]}" string="Promo" icon="fa-percent" context="{'as_pricelist_id': as_pricelist_id }"/>
 			</xpath>			
 			<xpath expr="//notebook//page[@name='order_lines']/field[@name='order_line']/tree/field[@name='price_total']" position="after">
-				<button name="pricelist_apply" type="object" string="Precios" icon="fa-cart-plus"/>
+				<button name="pricelist_apply" type="object" attrs="{'invisible': [('as_product_comisionable', '!=', False)]}" string="Precios" icon="fa-cart-plus"/>
 			</xpath>
 
 			<xpath expr="//tree//field[@name='product_uom_qty']" position="after">

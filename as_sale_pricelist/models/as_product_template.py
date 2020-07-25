@@ -12,3 +12,6 @@ class as_product_template(models.Model):
    
     as_proveedor = fields.Many2one(comodel_name='res.partner', string='Cliente - Proveedor')
     tf_import_tax = fields.Float('IMPORT TAX')
+    as_product_comisionable = fields.Boolean('Producto no Comisionable')
+    as_zebra = fields.Boolean('Es Zebra')
+

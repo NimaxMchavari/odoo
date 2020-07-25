@@ -28,3 +28,19 @@ class as_accountinvoice(models.Model):
             else:
                 name =' '
         return name
+
+    def get_product_lot(self,product_id):
+        names = ''
+        sale_order = self.env['sale.order'].search([('name','=',self.invoice_origin)],limit=1)
+        for pick in sale_order.picking_ids:
+            for move in pick.move_line_ids_without_package:
+                if product_id == move.product_id.id:
+                    names += str(move.lot_id.name)
+        return names
+        
+    def get_referencia_pedido(self):
+        sale_order = self.env['sale.order'].search([('name','=',self.invoice_origin)],limit=1)
+        if sale_order and 'x_studio_orden_de_compra' in sale_order:
+            return sale_order.x_studio_orden_de_compra
+        else:
+            return 'N/A'

@@ -53,14 +53,14 @@ class SaleOrderPricelistWizard(models.Model):
                         price_based_usd = (so_line_obj.product_id.list_price - (so_line_obj.product_id.list_price * tf_partner_id.partner_discount/100))*tf_partner_id.cost_deal_import/100*(so_line_obj.product_id.product_tmpl_id.tf_import_tax/100)
                         cost_nimax_usd = ((so_line_obj.product_id.list_price - (so_line_obj.product_id.list_price*tf_partner_id.purchase_discount/100))-(so_line_obj.product_id.list_price*tf_partner_id.fulfillment_rebate/100))*(tf_partner_id.cost_deal_import/100)*(so_line_obj.product_id.product_tmpl_id.tf_import_tax/100)
                         #covertimos valores
-                        margin_per = self.env.user.company_id.currency_id._convert(margin_per, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order)
-                        margin2 = self.env.user.company_id.currency_id._convert(margin2, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order)
-                        cost_nimax_usd = self.env.user.company_id.currency_id._convert(cost_nimax_usd, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order)
-                        price_based_usd = self.env.user.company_id.currency_id._convert(price_based_usd, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order)
-                        descuento = self.env.user.company_id.currency_id._convert(descuento, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order)
-                        price_unit = self.env.user.company_id.currency_id._convert(price_unit, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order)
-                        list_price = self.env.user.company_id.currency_id._convert(so_line_obj.product_id.list_price, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order)
-                        as_last_purchase_price = self.env.user.company_id.currency_id._convert(so_line_obj.product_id.as_last_purchase_price, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order)
+                        margin_per = self.env.user.company_id.currency_id._convert_nimax(margin_per, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order,so_line_obj.id)
+                        margin2 = self.env.user.company_id.currency_id._convert_nimax(margin2, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order,so_line_obj.id)
+                        cost_nimax_usd = self.env.user.company_id.currency_id._convert_nimax(cost_nimax_usd, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order,so_line_obj.id)
+                        price_based_usd = self.env.user.company_id.currency_id._convert_nimax(price_based_usd, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order,so_line_obj.id)
+                        descuento = self.env.user.company_id.currency_id._convert_nimax(descuento, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order,so_line_obj.id)
+                        price_unit = self.env.user.company_id.currency_id._convert_nimax(price_unit, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order,so_line_obj.id)
+                        list_price = self.env.user.company_id.currency_id._convert_nimax(so_line_obj.product_id.list_price, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order,so_line_obj.id)
+                        as_last_purchase_price = self.env.user.company_id.currency_id._convert_nimax(so_line_obj.product_id.as_last_purchase_price, pricelist.currency_id, self.env.user.company_id,so_line_obj.order_id.date_order,so_line_obj.id)
                         wz_line_id = self.env['sale.order.pricelist.wizard.line'].create({'sh_pricelist_id' :pricelist.id,
                                                                                     'sh_unit_price':price_unit,
                                                                                     'sh_unit_measure':so_line_obj.product_uom.id,
@@ -118,11 +118,11 @@ class SaleOrderPricelistWizardLine(models.Model):
             moneda_mxn = self.env['res.currency'].search([('id','=',33)])
             moneda_usd = self.env['res.currency'].search([('id','=',2)])
             price_unit = self.nimax_price_usd
-            RECALCULATED_PRICE_UNIT = self.line_id.currency_id._convert(price_unit, moneda_usd, self.env.user.company_id, fields.Date.today())
-            monto_mxp=self.line_id.currency_id._convert(self.nimax_price_usd, moneda_mxn, self.env.user.company_id, fields.Date.today())
+            RECALCULATED_PRICE_UNIT = self.line_id.currency_id._convert_nimax(price_unit, moneda_usd, self.env.user.company_id, fields.Date.today(),self.line_id.id)
+            monto_mxp=self.line_id.currency_id._convert_nimax(self.nimax_price_usd, moneda_mxn, self.env.user.company_id, fields.Date.today(),self.line_id.id)
             NIMAX_PRICE_MXP = monto_mxp
-            COST_NIMAX_USD = self.line_id.currency_id._convert(self.cost_nimax_usd, moneda_usd, self.env.user.company_id, fields.Date.today())
-            COST_NIMAX_MXP = self.line_id.currency_id._convert(self.cost_nimax_usd, moneda_mxn, self.env.user.company_id, fields.Date.today())
+            COST_NIMAX_USD = self.line_id.currency_id._convert_nimax(self.cost_nimax_usd, moneda_usd, self.env.user.company_id, fields.Date.today(),self.line_id.id)
+            COST_NIMAX_MXP = self.line_id.currency_id._convert_nimax(self.cost_nimax_usd, moneda_mxn, self.env.user.company_id, fields.Date.today(),self.line_id.id)
             MARGIN_MXP = (NIMAX_PRICE_MXP*self.line_id.product_uom_qty)-(COST_NIMAX_MXP*self.line_id.product_uom_qty)
             MARGIN_USD = (RECALCULATED_PRICE_UNIT*self.line_id.product_uom_qty)-(COST_NIMAX_USD*self.line_id.product_uom_qty)
             TOTAL_USD = RECALCULATED_PRICE_UNIT*self.line_id.product_uom_qty

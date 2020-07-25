@@ -13,6 +13,8 @@
                 </xpath>
                 <field name="taxes_id" position="after">
                   <field name="tf_import_tax"/>
+                   <field name="as_product_comisionable"/>
+                   <field name="as_zebra"/>
                 </field>
             </field>
 

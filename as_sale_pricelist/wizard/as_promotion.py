@@ -50,7 +50,7 @@ class asSaleOrderPromoWizard(models.Model):
             # tf_partner_id = self.env['tf.res.partner'].search([('partner_type', '=', so_line_obj.order_id.partner_id.as_partner_type.id),
             #                     ('category_id', '=', so_line_obj.product_id.categ_id.id)],
             #                     limit=1)
-            price_unitt = so_line_obj.currency_id._convert(so_line_obj.price_unit, self.env.user.company_id.currency_id, self.env.user.company_id, so_line_obj.order_id.date_order)
+            price_unitt = so_line_obj.currency_id._convert_nimax(so_line_obj.price_unit, self.env.user.company_id.currency_id, self.env.user.company_id, so_line_obj.order_id.date_order,so_line_obj.id)
             if promos_aprobadas:
                 for promo in promos_aprobadas:
 
@@ -253,10 +253,10 @@ class as_SaleOrderPromoWizardLine(models.Model):
                 moneda_usd = self.env['res.currency'].search([('id','=',2)])
                 price_unit = self.line_id.price_unit
                 RECALCULATED_PRICE_UNIT = self.RECALCULATED_PRICE_UNIT
-                monto_mxp= moneda_usd._convert(self.RECALCULATED_PRICE_UNIT, moneda_mxn, self.env.user.company_id, fields.Date.today())
+                monto_mxp= moneda_usd._convert_nimax(self.RECALCULATED_PRICE_UNIT, moneda_mxn, self.env.user.company_id, fields.Date.today(),self.line_id.id)
                 NIMAX_PRICE_MXP = monto_mxp
-                COST_NIMAX_USD = moneda_usd._convert(self.RECALCULATED_COST_NIMAX_USD, moneda_usd, self.env.user.company_id, fields.Date.today())
-                COST_NIMAX_MXP = moneda_usd._convert(self.RECALCULATED_COST_NIMAX_USD, moneda_mxn, self.env.user.company_id, fields.Date.today())
+                COST_NIMAX_USD = moneda_usd._convert_nimax(self.RECALCULATED_COST_NIMAX_USD, moneda_usd, self.env.user.company_id, fields.Date.today(),self.line_id.id)
+                COST_NIMAX_MXP = moneda_usd._convert_nimax(self.RECALCULATED_COST_NIMAX_USD, moneda_mxn, self.env.user.company_id, fields.Date.today(),self.line_id.id)
                 MARGIN_MXP = (NIMAX_PRICE_MXP*self.line_id.product_uom_qty)-(COST_NIMAX_MXP*self.line_id.product_uom_qty)
                 MARGIN_USD = (RECALCULATED_PRICE_UNIT*self.line_id.product_uom_qty)-(COST_NIMAX_USD*self.line_id.product_uom_qty)
                 TOTAL_USD = RECALCULATED_PRICE_UNIT*self.line_id.product_uom_qty
@@ -278,10 +278,10 @@ class as_SaleOrderPromoWizardLine(models.Model):
                 moneda_usd = self.env['res.currency'].search([('id','=',2)])
                 price_unit = self.line_id.price_unit
                 RECALCULATED_PRICE_UNIT = self.RECALCULATED_PRICE_UNIT
-                monto_mxp= moneda_usd._convert(RECALCULATED_PRICE_UNIT, moneda_mxn, self.env.user.company_id, fields.Date.today())
+                monto_mxp= moneda_usd._convert_nimax(RECALCULATED_PRICE_UNIT, moneda_mxn, self.env.user.company_id, fields.Date.today(),self.line_id.id)
                 NIMAX_PRICE_MXP = monto_mxp
                 COST_NIMAX_USD = self.RECALCULATED_COST_NIMAX_USD
-                COST_NIMAX_MXP = moneda_usd._convert(self.RECALCULATED_COST_NIMAX_USD, moneda_mxn, self.env.user.company_id, fields.Date.today())
+                COST_NIMAX_MXP = moneda_usd._convert_nimax(self.RECALCULATED_COST_NIMAX_USD, moneda_mxn, self.env.user.company_id, fields.Date.today(),self.line_id.id)
                 MARGIN_MXP = (NIMAX_PRICE_MXP*self.line_id.product_uom_qty)-(COST_NIMAX_MXP*self.line_id.product_uom_qty)
                 MARGIN_USD = (RECALCULATED_PRICE_UNIT*self.line_id.product_uom_qty)-(COST_NIMAX_USD*self.line_id.product_uom_qty)
                 TOTAL_USD = RECALCULATED_PRICE_UNIT*self.line_id.product_uom_qty
@@ -309,10 +309,10 @@ class as_SaleOrderPromoWizardLine(models.Model):
                 moneda_usd = self.env['res.currency'].search([('id','=',2)])
                 price_unit = self.line_id.price_unit
                 RECALCULATED_PRICE_UNIT = self.RECALCULATED_PRICE_UNIT
-                monto_mxp= moneda_usd._convert(RECALCULATED_PRICE_UNIT, moneda_mxn, self.env.user.company_id, fields.Date.today())
+                monto_mxp= moneda_usd._convert_nimax(RECALCULATED_PRICE_UNIT, moneda_mxn, self.env.user.company_id, fields.Date.today(),self.line_id.id)
                 NIMAX_PRICE_MXP = monto_mxp
-                COST_NIMAX_USD = moneda_usd._convert(self.RECALCULATED_COST_NIMAX_USD, moneda_usd, self.env.user.company_id, fields.Date.today())
-                COST_NIMAX_MXP = moneda_usd._convert(self.RECALCULATED_COST_NIMAX_USD, moneda_mxn, self.env.user.company_id, fields.Date.today())
+                COST_NIMAX_USD = moneda_usd._convert_nimax(self.RECALCULATED_COST_NIMAX_USD, moneda_usd, self.env.user.company_id, fields.Date.today(),self.line_id.id)
+                COST_NIMAX_MXP = moneda_usd._convert_nimax(self.RECALCULATED_COST_NIMAX_USD, moneda_mxn, self.env.user.company_id, fields.Date.today(),self.line_id.id)
                 MARGIN_MXP = (NIMAX_PRICE_MXP*self.line_id.product_uom_qty)-(COST_NIMAX_MXP*self.line_id.product_uom_qty)
                 MARGIN_USD = (RECALCULATED_PRICE_UNIT*self.line_id.product_uom_qty)-(COST_NIMAX_USD*self.line_id.product_uom_qty)
                 TOTAL_USD = RECALCULATED_PRICE_UNIT*self.line_id.product_uom_qty
@@ -339,10 +339,10 @@ class as_SaleOrderPromoWizardLine(models.Model):
                 moneda_usd = self.env['res.currency'].search([('id','=',2)])
                 price_unit = self.line_id.price_unit
                 RECALCULATED_PRICE_UNIT = self.RECALCULATED_PRICE_UNIT
-                monto_mxp= moneda_usd._convert(RECALCULATED_PRICE_UNIT, moneda_mxn, self.env.user.company_id, fields.Date.today())
+                monto_mxp= moneda_usd._convert_nimax(RECALCULATED_PRICE_UNIT, moneda_mxn, self.env.user.company_id, fields.Date.today(),self.line_id.id)
                 NIMAX_PRICE_MXP = monto_mxp
-                COST_NIMAX_USD = moneda_usd._convert(self.RECALCULATED_COST_NIMAX_USD, moneda_usd, self.env.user.company_id, fields.Date.today())
-                COST_NIMAX_MXP = moneda_usd._convert(self.RECALCULATED_COST_NIMAX_USD, moneda_mxn, self.env.user.company_id, fields.Date.today())
+                COST_NIMAX_USD = moneda_usd._convert_nimax(self.RECALCULATED_COST_NIMAX_USD, moneda_usd, self.env.user.company_id, fields.Date.today(),self.line_id.id)
+                COST_NIMAX_MXP = moneda_usd._convert_nimax(self.RECALCULATED_COST_NIMAX_USD, moneda_mxn, self.env.user.company_id, fields.Date.today(),self.line_id.id)
                 MARGIN_MXP = (NIMAX_PRICE_MXP*self.line_id.product_uom_qty)-(COST_NIMAX_MXP*self.line_id.product_uom_qty)
                 MARGIN_USD = (RECALCULATED_PRICE_UNIT*self.line_id.product_uom_qty)-(COST_NIMAX_USD*self.line_id.product_uom_qty)
                 TOTAL_USD = RECALCULATED_PRICE_UNIT*self.line_id.product_uom_qty
@@ -358,7 +358,7 @@ class as_SaleOrderPromoWizardLine(models.Model):
                     'MARGIN_MXP':  MARGIN_MXP,
                     'TOTAL_MXP':  TOTAL_MXP,
                 })
-            precio_nimax= self.env.user.company_id.currency_id._convert(self.RECALCULATED_PRICE_UNIT, self.line_id.currency_id, self.env.user.company_id, self.line_id.order_id.date_order)
+            precio_nimax= self.env.user.company_id.currency_id._convert_nimax(self.RECALCULATED_PRICE_UNIT, self.line_id.currency_id, self.env.user.company_id, self.line_id.order_id.date_order,self.line_id.id)
             data_update.update({
                 'price_unit': precio_nimax,
                 'COST_NIMAX_USD': self.RECALCULATED_COST_NIMAX_USD,

@@ -21,23 +21,24 @@ class SaleOrderLine(models.Model):
     TOTAL_USD = fields.Float('TOTAL USD')
     TOTAL_MXP = fields.Float('TOTAL MXP')
     as_margin_porcentaje = fields.Float('Margen Porcentaje',compute='get_margin_porcentaje',store=True)
-
+    as_product_comisionable = fields.Boolean(related="product_id.as_product_comisionable")
     coupon_ids = fields.Many2many('sale.coupon.program', string='Coupons')
     RECALCULATED_COST_NIMAX_USD = fields.Float('RECALCULATED COST NIMAX USD')
 
     @api.depends('COST_NIMAX_USD','RECALCULATED_PRICE_UNIT')
     def get_margin_porcentaje(self):
         for sale_line in self:
-            moneda_mxn = self.env['res.currency'].search([('id','=',33)])
-            moneda_usd = self.env['res.currency'].search([('id','=',2)])
-            if moneda_usd != sale_line.currency_id:
-                price = moneda_mxn._convert(sale_line.price_unit,moneda_usd, self.env.user.company_id, fields.Date.today())
-            else:
-                price = sale_line.price_unit
-            price_total_unit = price*sale_line.product_uom_qty
-            price_total_cost = sale_line.COST_NIMAX_USD*sale_line.product_uom_qty
-            if price_total_unit > 0:
-                sale_line.as_margin_porcentaje = ((price_total_unit-price_total_cost)/price_total_unit)*100
+            if not sale_line.as_product_comisionable:
+                moneda_mxn = self.env['res.currency'].search([('id','=',33)])
+                moneda_usd = self.env['res.currency'].search([('id','=',2)])
+                if moneda_usd != sale_line.currency_id:
+                    price = moneda_mxn._convert_nimax(sale_line.price_unit,moneda_usd, self.env.user.company_id, fields.Date.today(),sale_line.id)
+                else:
+                    price = sale_line.price_unit
+                price_total_unit = price*sale_line.product_uom_qty
+                price_total_cost = sale_line.COST_NIMAX_USD*sale_line.product_uom_qty
+                if price_total_unit > 0:
+                    sale_line.as_margin_porcentaje = ((price_total_unit-price_total_cost)/price_total_unit)*100
         
     # apply pricelist
     def pricelist_apply(self):
@@ -70,53 +71,63 @@ class SaleOrderLine(models.Model):
         moneda_mxn = self.env['res.currency'].search([('id','=',33)])
         moneda_usd = self.env['res.currency'].search([('id','=',2)])
         for sale_line in self:
-            if moneda_mxn == sale_line.currency_id:
-                new_amrgin= (sale_line.price_unit*sale_line.product_uom_qty)-(sale_line.COST_NIMAX_MXP*sale_line.product_uom_qty)
-                sale_line.MARGIN_MXP=new_amrgin
-                sale_line.MARGIN_USD=moneda_mxn._convert(new_amrgin,moneda_usd, self.env.user.company_id, fields.Date.today())
-                sale_line.get_margin_porcentaje()
-                sale_line.TOTAL_MXP = sale_line.price_unit * sale_line.product_uom_qty
-                sale_line.TOTAL_USD = moneda_mxn._convert(sale_line.TOTAL_MXP,moneda_usd, self.env.user.company_id, fields.Date.today())
-                sale_line.RECALCULATED_PRICE_UNIT = moneda_mxn._convert(sale_line.price_unit, moneda_usd,self.env.user.company_id, fields.Date.today())
-                sale_line.NIMAX_PRICE_MXP = sale_line.price_unit
-            else:
-                new_amrgin= (sale_line.price_unit*sale_line.product_uom_qty)-(sale_line.COST_NIMAX_USD*sale_line.product_uom_qty)
-                sale_line.MARGIN_USD=new_amrgin
-                sale_line.MARGIN_MXP=moneda_usd._convert(new_amrgin,moneda_mxn, self.env.user.company_id, fields.Date.today())
-                sale_line.get_margin_porcentaje()
-                sale_line.TOTAL_USD = sale_line.price_unit * sale_line.product_uom_qty
-                sale_line.TOTAL_MXP = moneda_usd._convert(sale_line.TOTAL_USD,moneda_mxn, self.env.user.company_id, fields.Date.today())
-                sale_line.RECALCULATED_PRICE_UNIT = sale_line.price_unit
-                sale_line.NIMAX_PRICE_MXP = moneda_usd._convert(sale_line.price_unit,moneda_mxn, self.env.user.company_id, fields.Date.today())
-            tf_partner_id = self.env['tf.res.partner']
-            for x in sale_line.order_id.partner_id.tf_vendor_parameter_ids:
-                if x.category_id.id == sale_line.product_id.categ_id.id:
-                    tf_partner_id = x
-            if sale_line.as_pricelist_id and sale_line.as_log_price:
-                self.env['tf.history.promo'].create(dict(
-                    # promotion_id=,
-                    vendor_id=tf_partner_id.partner_id.id,
-                    product_id=sale_line.product_id.id,
-                    customer_id=sale_line.order_id.partner_id.id,
-                    customer_type=tf_partner_id.partner_type.id,
-                    as_pricelist_id = sale_line.as_pricelist_id.id,
-                    category_id=sale_line.product_id.categ_id.id,
-                    qty=sale_line.product_uom_qty,
-                    recalculated_price_unit=sale_line.RECALCULATED_PRICE_UNIT,
-                    recalculated_price_unit_mxp=sale_line.NIMAX_PRICE_MXP,
-                    recalculated_cost_nimax_usd=sale_line.COST_NIMAX_USD,
-                    recalculated_cost_nimax_mxp=sale_line.COST_NIMAX_MXP,
-                    margin_mxp=sale_line.MARGIN_MXP,
-                    margin_usd=sale_line.MARGIN_USD,
-                    total_usd=sale_line.TOTAL_USD,
-                    total_mxp=sale_line.TOTAL_MXP,
-                    # last_applied_promo=,
-                    salesman_id=sale_line.order_id.user_id.id,
+            if sale_line.product_id.as_zebra:
+                sale_line.order_id.x_studio_zebra=True
+            if not sale_line.as_product_comisionable:
+                if moneda_mxn == sale_line.currency_id:
+                    new_amrgin= (sale_line.price_unit*sale_line.product_uom_qty)-(sale_line.COST_NIMAX_MXP*sale_line.product_uom_qty)
+                    sale_line.MARGIN_MXP=new_amrgin
+                    sale_line.MARGIN_USD=moneda_mxn._convert_nimax(new_amrgin,moneda_usd, self.env.user.company_id, fields.Date.today(),sale_line.id)
+                    sale_line.get_margin_porcentaje()
+                    sale_line.TOTAL_MXP = sale_line.price_unit * sale_line.product_uom_qty
+                    sale_line.TOTAL_USD = moneda_mxn._convert_nimax(sale_line.TOTAL_MXP,moneda_usd, self.env.user.company_id, fields.Date.today(),sale_line.id)
+                    sale_line.RECALCULATED_PRICE_UNIT = moneda_mxn._convert_nimax(sale_line.price_unit, moneda_usd,self.env.user.company_id, fields.Date.today(),sale_line.id)
+                    sale_line.NIMAX_PRICE_MXP = sale_line.price_unit
+                else:
+                    new_amrgin= (sale_line.price_unit*sale_line.product_uom_qty)-(sale_line.COST_NIMAX_USD*sale_line.product_uom_qty)
+                    sale_line.MARGIN_USD=new_amrgin
+                    sale_line.MARGIN_MXP=moneda_usd._convert_nimax(new_amrgin,moneda_mxn, self.env.user.company_id, fields.Date.today(),sale_line.id)
+                    sale_line.get_margin_porcentaje()
+                    sale_line.TOTAL_USD = sale_line.price_unit * sale_line.product_uom_qty
+                    sale_line.TOTAL_MXP = moneda_usd._convert_nimax(sale_line.TOTAL_USD,moneda_mxn, self.env.user.company_id, fields.Date.today(),sale_line.id)
+                    sale_line.RECALCULATED_PRICE_UNIT = sale_line.price_unit
+                    sale_line.NIMAX_PRICE_MXP = moneda_usd._convert_nimax(sale_line.price_unit,moneda_mxn, self.env.user.company_id, fields.Date.today(),sale_line.id)
+                tf_partner_id = self.env['tf.res.partner']
+                for x in sale_line.order_id.partner_id.tf_vendor_parameter_ids:
+                    if x.category_id.id == sale_line.product_id.categ_id.id:
+                        tf_partner_id = x
+                if sale_line.as_pricelist_id and sale_line.as_log_price:
+                    self.env['tf.history.promo'].create(dict(
+                        # promotion_id=,
+                        vendor_id=tf_partner_id.partner_id.id,
+                        product_id=sale_line.product_id.id,
+                        customer_id=sale_line.order_id.partner_id.id,
+                        customer_type=tf_partner_id.partner_type.id,
+                        as_pricelist_id = sale_line.as_pricelist_id.id,
+                        category_id=sale_line.product_id.categ_id.id,
+                        qty=sale_line.product_uom_qty,
+                        recalculated_price_unit=sale_line.RECALCULATED_PRICE_UNIT,
+                        recalculated_price_unit_mxp=sale_line.NIMAX_PRICE_MXP,
+                        recalculated_cost_nimax_usd=sale_line.COST_NIMAX_USD,
+                        recalculated_cost_nimax_mxp=sale_line.COST_NIMAX_MXP,
+                        margin_mxp=sale_line.MARGIN_MXP,
+                        margin_usd=sale_line.MARGIN_USD,
+                        total_usd=sale_line.TOTAL_USD,
+                        total_mxp=sale_line.TOTAL_MXP,
+                        # last_applied_promo=,
+                        salesman_id=sale_line.order_id.user_id.id,
 
-                    sale_id=sale_line.order_id.id,
-                ))
-            sale_line.as_log_price=True
-
+                        sale_id=sale_line.order_id.id,
+                    ))
+                sale_line.as_log_price=True
+            if sale_line.as_product_comisionable:
+                if moneda_mxn == sale_line.currency_id:
+                    sale_line.RECALCULATED_PRICE_UNIT = moneda_mxn._convert_nimax(sale_line.price_unit, moneda_usd,self.env.user.company_id, fields.Date.today(),sale_line.id)
+                    sale_line.NIMAX_PRICE_MXP = sale_line.price_unit
+                else:
+                    sale_line.RECALCULATED_PRICE_UNIT = sale_line.price_unit
+                    sale_line.NIMAX_PRICE_MXP = moneda_usd._convert_nimax(sale_line.price_unit,moneda_mxn, self.env.user.company_id, fields.Date.today(),sale_line.id)
+              
 
             
 
@@ -134,15 +145,16 @@ class SaleOrder(models.Model):
         total_margin = 0.0
         for order in self:
             for line in order.order_line:
-                moneda_mxn = self.env['res.currency'].search([('id','=',33)])
-                moneda_usd = self.env['res.currency'].search([('id','=',2)])
-                if moneda_usd != line.currency_id:
-                    price = moneda_mxn._convert(line.price_unit,moneda_usd, self.env.user.company_id, fields.Date.today())
-                else:
-                    price = line.price_unit
-                total_price += price * line.product_uom_qty
-                total_cost += line.COST_NIMAX_USD * line.product_uom_qty
-                line.get_margin_utilidad()
+                if not line.as_product_comisionable:
+                    moneda_mxn = self.env['res.currency'].search([('id','=',33)])
+                    moneda_usd = self.env['res.currency'].search([('id','=',2)])
+                    if moneda_usd != line.currency_id:
+                        price = moneda_mxn._convert_nimax(line.price_unit,moneda_usd, self.env.user.company_id, fields.Date.today(),line.id)
+                    else:
+                        price = line.price_unit
+                    total_price += price * line.product_uom_qty
+                    total_cost += line.COST_NIMAX_USD * line.product_uom_qty
+                    line.get_margin_utilidad()
             if total_price > 0:
                 total_margin += (total_price-total_cost)/total_price
             order.update({
@@ -185,10 +197,11 @@ class SaleOrder(models.Model):
             access = False
             no_access = False
             for line in self.order_line:
-                if (line.as_margin_porcentaje  > 0) and (line.as_margin_porcentaje  < float(margin_minimo)):
-                    access= True
-                elif (float(line.as_margin_porcentaje) < float(margin_global)):
-                    no_access = True
+                if not line.as_product_comisionable:
+                    if (line.as_margin_porcentaje  > 0) and (line.as_margin_porcentaje  < float(margin_minimo)):
+                        access= True
+                    elif (float(line.as_margin_porcentaje) < float(margin_global)):
+                        no_access = True
             if access:
                 action = self.env.ref('as_sale_pricelist.action_aprobe_sales_qweb').read()[0]
                 action.update({
@@ -219,7 +232,7 @@ class SaleOrder(models.Model):
                 if tf_history_id:
                     tf_history_id.last_applied_promo = True
             for line in rec.order_line:
-                if not line.as_pricelist_id:
+                if not line.as_pricelist_id and not line.as_product_comisionable:
                     product.append(line.product_id.name)
         if product != []:
             raise ValidationError('EXISTEN LINEAS PRODUCTO SIN PRECIO BASE : %s' % str(product))
