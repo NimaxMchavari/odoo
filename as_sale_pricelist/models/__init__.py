@@ -2,6 +2,7 @@
 # Part of Softhealer Technologies.
 
 from . import as_product_template
+from . import as_res_currency
 from . import sale_order_inherit
 from . import as_pricelist
 from . import as_partner_type
@@ -15,4 +16,3 @@ from . import tf_promotions_gift
 from . import as_invoice
 from . import as_tabla_comisiones
 from . import as_res_config
-from . import as_res_currency

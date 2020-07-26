@@ -11,7 +11,7 @@
     "description": """
 Lista de precios por linea de producto en ventas.
 """,    
-    "version":"13.2.1",
+    "version":"13.2.2",
     "depends" : [
         "base",
         "sale_management",
@@ -41,7 +41,6 @@ Lista de precios por linea de producto en ventas.
               'views/tf_as_partner.xml',
               'views/history_promo.xml',
               'views/product_pricelist.xml',
-              'views/as_report_format.xml',
               'wizard/sale_order_pricelist_update_wizard.xml',
               'wizard/as_promotion.xml',
               # 'views/tf_promotions_gift.xml',
@@ -51,7 +50,9 @@ Lista de precios por linea de producto en ventas.
               'wizard/as_report_comisiones.xml',
               'views/as_res_config.xml',
               #'views/as_report_component.xml',
-              'wizard/as_aprobe_utility.xml'
+              'views/report/as_report_invoice_mx.xml',
+              'wizard/as_aprobe_utility.xml',
+              'views/as_report_format.xml',
             ],            
     "images": ["static/description/background.png",],              
     "auto_install":False,

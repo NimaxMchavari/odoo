@@ -29,6 +29,24 @@ class as_accountinvoice(models.Model):
                 name =' '
         return name
 
+    def get_tasa_xml(self,product_id):
+        xml = self.l10n_mx_edi_get_xml_etree()
+        conceptos = xml.Conceptos.Concepto
+        impuestos = []
+        for product in conceptos:
+            if product.get('NoIdentificacion')== product_id:
+                for translado in product.Impuestos.Traslados.Traslado:
+                    if translado.attrib != {}:
+                        vals={
+                            'Tasa': translado.attrib['TasaOCuota'],
+                            'Base': round(float(translado.attrib['Base']),2),
+                            'Impuesto': round(float(translado.attrib['Impuesto']),2),
+                            'Importe': round(float(translado.attrib['Importe']),2),
+                        }
+                        impuestos.append(vals)
+
+        return impuestos
+
     def get_product_lot(self,product_id):
         names = ''
         sale_order = self.env['sale.order'].search([('name','=',self.invoice_origin)],limit=1)
