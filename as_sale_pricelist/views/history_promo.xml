@@ -30,6 +30,7 @@
                     <field name="last_applied_promo" optional="hide"/>
                     <field name="salesman_id" optional="show"/>
                     <field name="aty_invoice" optional="hide"/>
+                    <field name="fecha_factura" optional="hide"/>
                     <field name="state_sale" invisible="True"/>
                 </tree>
             </field>
@@ -108,6 +109,9 @@
                             </group>
                             <group id="header_left_group">
                                 <field name="sale_id"/>
+                            </group> 
+                             <group id="header_left_group">
+                                <field name="fecha_factura"/>
                             </group>
                             <group id="header_left_group">
                                 <field name="invoice_ids" readonly='1' force_save="1"  widget="many2many_tags"/>

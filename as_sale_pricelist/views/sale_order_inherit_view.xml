@@ -30,6 +30,7 @@
 				<field name="TOTAL_MXP" optional="hide"/>
 				<field name="RECALCULATED_COST_NIMAX_USD" optional="hide"/>
 				<field name="as_margin_porcentaje" optional="hide"/>
+				<!-- <field name="as_log_price" optional="hide"/> -->
 			</xpath>
 			<field name="payment_term_id" position="after">
 				<field name="last_promo_id" invisible="1"/>

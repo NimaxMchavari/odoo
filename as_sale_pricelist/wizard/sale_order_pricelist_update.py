@@ -141,7 +141,7 @@ class SaleOrderPricelistWizardLine(models.Model):
                 'MARGIN_USD': MARGIN_USD,
                 'TOTAL_USD': TOTAL_USD,
                 'TOTAL_MXP': TOTAL_MXP,
-                'as_log_price': False,
+                'as_log_price': True,
                                 })
         
 

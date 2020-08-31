@@ -9,6 +9,10 @@ _logger = logging.getLogger(__name__)
 class as_accountinvoice(models.Model):
     _inherit = "account.move"
 
+    def _onchange_terms(self):
+        invoice_terms =  self.company_id.invoice_terms
+        return invoice_terms
+
     @api.model
     def l10n_mx_edi_retrieve_attachments(self):
         '''Retrieve all the cfdi attachments generated for this invoice.

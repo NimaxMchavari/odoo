@@ -82,8 +82,10 @@ class CalculoComisiones(models.AbstractModel):
         sheet.write(filas, 3, 'TOTAL MARGEN VENTAS $US',titulo4) #cliente/proveedor
         sheet.write(filas, 4, '% DE COMISION <= LIMITE 1',titulo4) #cliente/proveedor
         sheet.write(filas, 5, 'A PAGAR MXP',titulo4) #cliente/proveedor
+        sheet.write(filas, 6, 'TOTAL VENTAS',titulo4) #cliente/proveedor
         total_margen = 0.0 
         total_pagar = 0.0 
+        total_ventas = 0.0 
         sheet.set_row(filas,30,titulo4)
         filas += 1
         cantidad = 0
@@ -101,17 +103,17 @@ class CalculoComisiones(models.AbstractModel):
         for partner in users:
             query_movements = ("""
                 select 
-                rp.name,sum(margin_usd)
+                rp.name,sum(margin_usd),sum(thp.total_usd)
                 from tf_history_promo thp
                 inner join sale_order so on thp.sale_id = so.id
                 inner join res_users ru on ru.id = thp.salesman_id
                 inner join res_partner rp on ru.partner_id = rp.id
                 where 
                 so.state not in ('cancel','draft') and
-                so.date_order::date BETWEEN '"""+str(data['form']['start_date'])+"""' AND  '"""+str(data['form']['end_date'])+"""'"""+filtro+""" 
+                thp.fecha_factura::date BETWEEN '"""+str(data['form']['start_date'])+"""' AND  '"""+str(data['form']['end_date'])+"""'"""+filtro+""" 
                 and ru.id="""+str(partner[0])+"""
                 and thp.last_applied_promo=True
-                and so.invoice_status ='invoiced'
+                and thp.invoice_name != ''
                 group by 1
                 """)
             #_logger.debug(query_movements)
@@ -143,9 +145,12 @@ class CalculoComisiones(models.AbstractModel):
                     total_pagar += pagar
                 sheet.write(filas, 4,  str(round(porcentaje*100,2))+str('%'),number_right_col1)
                 sheet.write(filas, 5,  pagar,number_right_col1)
+                sheet.write(filas, 6,  history[2],number_right_col1)
+                total_ventas += float(history[2])
                 filas += 1
 
         sheet.merge_range('A'+str(filas+1)+':C'+str(filas+1),'TOTAL ', number_right_col)
         sheet.write(filas, 4,  0.0,number_right_col)
         sheet.write(filas, 3, total_margen, number_right_col) 
         sheet.write(filas, 5, total_pagar, number_right_col) 
+        sheet.write(filas, 6, total_ventas, number_right_col) 

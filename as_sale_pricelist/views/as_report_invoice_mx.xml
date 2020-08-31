@@ -44,7 +44,7 @@
 
                             .letrablue {
                                 font-family: Helvetica Neue !important;
-                                font-size: 14px !important;
+                                font-size: 13px !important;
                                 margin: 0px;
                                 color: #465f7a;
                             }
@@ -69,7 +69,7 @@
                         </style>
 
                         <t t-if="o.l10n_mx_edi_cfdi_uuid">
-                         
+
                             <t t-set="xml" t-value="o.l10n_mx_edi_get_xml_etree()" />
                             <t t-set="tfd" t-value="o.l10n_mx_edi_get_tfd_etree(xml)" />
                             <t t-set="tfd_original_string" t-value="o._get_l10n_mx_edi_cadena()" />
@@ -83,6 +83,7 @@
                                         style="height: 55px; width:100%" />
                                     <br />
                                 </t>
+                                <br />
                                 <div class="letra">
                                     <b>
                                         <span t-esc="o.company_id.name" />
@@ -104,7 +105,7 @@
                                         <td class="content2"><b> <span t-esc="o.name" /></b></td>
                                     </tr>
                                 </table>
-
+                                <br />
                                 <div class="letra">
                                     <b>
                                         <span t-esc="o.partner_shipping_id.name" />
@@ -140,18 +141,41 @@
 
                         </div>
                         <br />
-                        <div id="informations" class="row mt0 mb0">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <td style="width:30%"><b class='letrablue'>FECHA DE FACTURA: </b>
+                                        <span class="letra" t-field="o.invoice_date" />
+                                        </td>
+                                
+                                <td style="width:30%">
+                                    <div t-if="o.invoice_date_due and o.type == 'out_invoice' and o.state == 'posted'"
+                                        name="due_date">
+                                        <b class='letrablue'>FECHA DE VENCIMIENTO: </b>
+                                        <span class="letra" t-field="o.invoice_date_due" />
+                                    </div>
+                                </td>
+                                <td style="width:15%"> <b class='letrablue'>ORIGEN:</b>
+                                    <span class="letra" t-field="o.invoice_origin" />
+                                </td>
+                                <td style="width:30%"> <b class='letrablue'>ORDEN DE COMPRA:</b>
+                                    <span class="letra" t-esc="o.get_referencia_pedido()" />
+                                </td>
+                                </tr>
+                            </thead>
+                        </table>
+                        <!-- <div id="informations" class="row mt0 mb0">
                             <div class="col-3" t-if="o.invoice_date" name="invoice_date">
                                 <b class='letrablue'>FECHA DE FACTURA: </b>
                                 <span class="letra" t-field="o.invoice_date" />
                             </div>
-                            <div class="col-3"
+                            <div class="col-4"
                                 t-if="o.invoice_date_due and o.type == 'out_invoice' and o.state == 'posted'"
                                 name="due_date">
                                 <b class='letrablue'>FECHA DE VENCIMIENTO: </b>
                                 <span class="letra" t-field="o.invoice_date_due" />
                             </div>
-                            <div class="col-3" t-if="o.invoice_origin" name="origin">
+                            <div class="col-2" t-if="o.invoice_origin" name="origin" style="width:200px">
                                 <b class='letrablue'>ORIGEN:</b>
                                 <span class="letra" t-field="o.invoice_origin" />
                             </div>
@@ -160,12 +184,12 @@
                                 <span class="letra" t-esc="o.get_referencia_pedido()" />
                             </div>
 
-                        </div>
+                        </div> -->
 
                     </div>
                     <t t-call="web.internal_layout">
                         <t t-if="o.l10n_mx_edi_cfdi_uuid">
-                         
+
                             <t t-set="xml" t-value="o.l10n_mx_edi_get_xml_etree()" />
                             <t t-set="tfd" t-value="o.l10n_mx_edi_get_tfd_etree(xml)" />
                             <t t-set="tfd_original_string" t-value="o._get_l10n_mx_edi_cadena()" />
@@ -459,9 +483,9 @@
                                                                 <p class="letra"><b>USO DE CFDI:</b>
                                                                     <t t-esc="xml.Receptor.get('UsoCFDI', False)" />
                                                                 </p>
-                                                                <p class="letra"><b>VERSIÓN CFDI:</b>
+                                                                <!-- <p class="letra"><b>VERSIÓN CFDI:</b>
                                                                     <t t-esc="tfd.get('Version')" />
-                                                                </p>
+                                                                </p> -->
                                                                 <p class="letra"><b>MONEDA:</b>
                                                                     <t t-esc="o.currency_id.name" />
                                                                 </p>
@@ -527,30 +551,8 @@
                                     <tr>
                                         <td colspan="6">
                                             <div class="parrafo2">
-                                                <b>NOTA IMPORTANTE:</b> No hay devoluciones después de 5 días
-                                                naturales. No hay
-                                                devoluciones
-                                                en
-                                                refacciones, consumibles, cabezales de impresión y software. <b>TODA
-                                                    DEVOLUCIÓN
-                                                    AUTORIZADA
-                                                    TENDRÁ UN CARGO
-                                                    DE 20% SOBRE EL PRECIO BRUTO FACTURADO </b> y se realizará a
-                                                través de nota de
-                                                crédito.
-                                                Debo y pagaré incondicionalmente por el presente <b>PAGARÉ a
-                                                    TECNOLOGÍA NIMAX S.A.
-                                                    DE
-                                                    C.V.,</b>
-                                                la cantidad total de esta factura que corresponde las mercancías
-                                                detalladas en el
-                                                presente
-                                                documento en el domicilio
-                                                de la empresa, obligándome a pagar para el caso de mora un interés
-                                                del 1% mensual
-                                                durante
-                                                todo
-                                                el tiempo que permanezca insoluto.
+                                                <b>NOTA IMPORTANTE:</b> <b>
+                                                    <t t-esc="o._onchange_terms()" /></b>
                                             </div>
 
                                         </td>

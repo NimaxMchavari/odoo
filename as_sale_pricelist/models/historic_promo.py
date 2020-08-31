@@ -19,6 +19,7 @@ class tfResPartner(models.Model):
                     history.aty_invoice = len(history.invoice_ids)
                     if history.aty_invoice > 0:
                         history.invoice_name = history.invoice_ids[0].name
+                        history.fecha_factura = history.invoice_ids[0].invoice_date
 
             else:
                 history.invoice_ids = []
@@ -46,6 +47,7 @@ class tfResPartner(models.Model):
 
     sale_id = fields.Many2one('sale.order', 'Sale Order')
     fecha_venta = fields.Datetime(string='Fecha Venta', compute="_get_invoiced_ver",store=True)
+    fecha_factura = fields.Date(string='Fecha de Factura', compute="_get_invoiced_ver",store=True)
     promo_id = fields.Many2one('sale.coupon.program', 'Promotion')
     aty_invoice = fields.Integer('cantidad factura',compute='_get_invoiced_ver')
     sale_order_line = fields.Many2one('sale.order.line')
