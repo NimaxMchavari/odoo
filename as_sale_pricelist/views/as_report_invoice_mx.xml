@@ -148,7 +148,7 @@
                                         <span class="letra" t-field="o.invoice_date" />
                                         </td>
                                 
-                                <td style="width:30%">
+                                <td style="width:35%">
                                     <div t-if="o.invoice_date_due and o.type == 'out_invoice' and o.state == 'posted'"
                                         name="due_date">
                                         <b class='letrablue'>FECHA DE VENCIMIENTO: </b>
@@ -158,7 +158,7 @@
                                 <td style="width:15%"> <b class='letrablue'>ORIGEN:</b>
                                     <span class="letra" t-field="o.invoice_origin" />
                                 </td>
-                                <td style="width:30%"> <b class='letrablue'>ORDEN DE COMPRA:</b>
+                                <td style="width:25%"> <b class='letrablue'>ORDEN DE COMPRA:</b>
                                     <span class="letra" t-esc="o.get_referencia_pedido()" />
                                 </td>
                                 </tr>
@@ -434,10 +434,9 @@
                                                 </td>
 
                                                 <td class="text-right o_price_total border">
-                                                    <span t-field="line.price_subtotal"
-                                                        groups="account.group_show_line_subtotals_tax_excluded" />
-                                                    <span t-field="line.price_total"
-                                                        groups="account.group_show_line_subtotals_tax_included" />
+                                                    <span t-field="line.price_subtotal"/>
+                                                    <!-- <span t-field="line.price_total"
+                                                        groups="account.group_show_line_subtotals_tax_included" /> -->
                                                 </td>
                                             </t>
 

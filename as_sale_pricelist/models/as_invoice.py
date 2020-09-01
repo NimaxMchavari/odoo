@@ -105,7 +105,7 @@ class as_accountinvoice(models.Model):
                                 vals={
                                     'Tasa': translado.attrib['TasaOCuota'],
                                     'Base': round(float(translado.attrib['Base']),2),
-                                    'Impuesto': round(float(translado.attrib['Impuesto']),2),
+                                    'Impuesto': translado.attrib['Impuesto'],
                                     'Importe': round(float(translado.attrib['Importe']),2),
                                 }
                                 bandera = True
