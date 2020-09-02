@@ -69,13 +69,19 @@ class SaleOrderLine(models.Model):
                 'context': {'promo_apply_dis_per': 'promo_apply_dis_per'},
             }
 
-    @api.onchange('price_unit','COST_NIMAX_USD')
+    @api.depends('product_id')
+    def get_option_zebra(self):    
+        for sale_line in self:
+            if sale_line.product_id.as_zebra:
+                sale_line.order_id.as_zebra_sale = True
+    
+    @api.onchange('price_unit','product_uom_qty')
     def get_margin_utilidad(self):
         moneda_mxn = self.env['res.currency'].search([('id','=',33)])
         moneda_usd = self.env['res.currency'].search([('id','=',2)])
         for sale_line in self:
             if sale_line.product_id.as_zebra:
-                sale_line.order_id.as_zebra_sale=True
+                sale_line.order_id.as_zebra_sale = True
             if not sale_line.as_product_comisionable:
                 if moneda_mxn == sale_line.currency_id:
                     new_amrgin= (sale_line.price_unit*sale_line.product_uom_qty)-(sale_line.COST_NIMAX_MXP*sale_line.product_uom_qty)
@@ -179,7 +185,7 @@ class SaleOrder(models.Model):
     as_zebra_sale = fields.Boolean(string="Es Zebra")
     as_usuario_final = fields.Char(string="Usuario Final")
 
-    @api.onchange('order_line.price_unit','order_line.COST_NIMAX_USD')
+    @api.depends('order_line.price_unit','order_line.COST_NIMAX_USD')
     def _amount_all_marigin(self):
         total_price = 0.0
         total_cost = 0.0
