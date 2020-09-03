@@ -275,8 +275,8 @@ class SaleOrder(models.Model):
                 query_ids = ("""
                 SELECT id FROM tf_history_promo tf 
                 where
-                tf.sale_id = """+str(rec.id)+""" and tf.product_id = """+str(line.product_id.id)+""" and sale_order_line= """+str(line.id)+""" and tf.promo_id is not null
-                order by tf.create_date desc 
+                tf.sale_id = """+str(rec.id)+""" and tf.product_id = """+str(line.product_id.id)+""" and sale_order_line= """+str(line.id)+""" 
+                order by tf.create_date desc limit 1
                 """)
                 self.env.cr.execute(query_ids)
                 history_table = [j for j in self.env.cr.fetchall()]
@@ -284,17 +284,17 @@ class SaleOrder(models.Model):
                 if tf_history_id:
                     tf_history_id.last_applied_promo = True
                 #tomamos la ultima tarifa aplicada
-                query_ids1 = ("""
-                SELECT id FROM tf_history_promo tf 
-                where
-                tf.sale_id = """+str(rec.id)+""" and tf.product_id = """+str(line.product_id.id)+""" and tf.promo_id is null
-                order by tf.create_date desc limit 1
-                """)
-                self.env.cr.execute(query_ids1)
-                history_table1 = [j for j in self.env.cr.fetchall()]
-                tf_history_id1 = self.env['tf.history.promo'].search([('id', 'in', history_table1)])
-                if tf_history_id1:
-                    tf_history_id1.last_applied_promo = True
+                # query_ids1 = ("""
+                # SELECT id FROM tf_history_promo tf 
+                # where
+                # tf.sale_id = """+str(rec.id)+""" and tf.product_id = """+str(line.product_id.id)+""" and tf.promo_id is null
+                # order by tf.create_date desc limit 1
+                # """)
+                # self.env.cr.execute(query_ids1)
+                # history_table1 = [j for j in self.env.cr.fetchall()]
+                # tf_history_id1 = self.env['tf.history.promo'].search([('id', 'in', history_table1)])
+                # if tf_history_id1:
+                #     tf_history_id1.last_applied_promo = True
             for line in rec.order_line:
                 if not line.as_pricelist_id and not line.as_product_comisionable:
                     product.append(line.product_id.name)

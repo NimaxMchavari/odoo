@@ -166,6 +166,7 @@ class SaleOrderPricelistWizardLine(models.Model):
                 salesman_id=self.line_id.order_id.user_id.id,
 
                 sale_id=self.line_id.order_id.id,
+                sale_order_line=self.line_id.id,
             ))
 
 

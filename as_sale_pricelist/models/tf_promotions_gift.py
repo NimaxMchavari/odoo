@@ -15,7 +15,7 @@ class tfGiftCouponProgram(models.Model):
     _name = "tf.gift.coupon.program"
 
     coupon_id = fields.Many2one('sale.coupon.program', string='Promo')
-    name = fields.Selection(as_type, string='Tipo de Promocion', default='Normal')
+    name = fields.Selection(as_type, string='Tipo de Promocion', default='NORMAL')
     max_gifted_qty = fields.Float('MAX GIFT QTY')
     gifted_qty = fields.Float('Gifted')
     balance = fields.Float('Balance', compute='_compute_balance')

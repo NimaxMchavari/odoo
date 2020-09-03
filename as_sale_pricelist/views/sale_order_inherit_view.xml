@@ -16,7 +16,7 @@
 			</xpath>
 
 			<xpath expr="//tree//field[@name='product_uom_qty']" position="after">
-				<field name="margin2" optional="show" string="Margen (%)"/>
+			
 				<field name="as_pricelist_id" optional="show" string="Lista Precio"/>
 			</xpath>
 			<xpath expr="//notebook//page[@name='order_lines']/field[@name='order_line']/tree" position="inside">
