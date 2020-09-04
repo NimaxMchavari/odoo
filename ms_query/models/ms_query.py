@@ -1,9 +1,8 @@
-from odoo import fields, api, models
-from odoo.exceptions import UserError
+from odoo import fields, api, models, _
+from odoo.exceptions import UserError, RedirectWarning
 from datetime import datetime
 import pytz
 from pytz import timezone
-from odoo.exceptions import Warning
 
 class MsQuery(models.Model):
     _name = "ms.query"
@@ -12,19 +11,18 @@ class MsQuery(models.Model):
     
     backup = fields.Text('Backup Syntax', help="Backup your query if needed")
     name = fields.Text('Syntax', required=True)
-    result = fields.Text('Result')
+    result = fields.Text('Result', default='[]')
 
     def get_real_datetime(self):
         if not self.env.user.tz :
-            raise Warning("Please set your timezone in Users menu.")
+            action = self.env.ref('base.action_res_users')
+            msg = _("Please set your timezone in Users menu.")
+            raise RedirectWarning(msg, action.id, _("Go to Users menu"))
         return pytz.UTC.localize(datetime.now()).astimezone(timezone(self.env.user.tz))
-    
-    @api.multi
+
     def execute_query(self):
         if not self.name :
             return
-        while self.name[:1] == ' ' :
-            self.name = self.name[1:]
         prefix = self.name[:6].upper()
         try :
             self._cr.execute(self.name)
@@ -32,13 +30,13 @@ class MsQuery(models.Model):
             raise UserError(e)
 
         if prefix == 'SELECT' :
-            result = self._cr.fetchall()
+            result = self._cr.dictfetchall()
             if result :
-               self.result = result[0]
-            else :
+                self.result = '\n\n'.join(str(res) for res in result)
+            else:
                 self.result = "Data not found"
         elif prefix == 'UPDATE' :
-            self.result = '%d row affected'%(self._cr.rowcount)
+            self.result = '%d row(s) affected'%(self._cr.rowcount)
         else :
             self.result = 'Successful'
-        self.message_post('%s<br><br>Executed on %s'%(self.name,str(self.get_real_datetime())[:19]))
+        self.message_post(body='%s<br><br>Executed on %s'%(self.name,str(self.get_real_datetime())[:19]))

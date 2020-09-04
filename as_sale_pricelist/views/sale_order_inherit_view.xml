@@ -43,7 +43,7 @@
 			</xpath>
 			<xpath expr="//field[@name='partner_shipping_id']" position="after">
 				<field name="as_zebra_sale" />
-				<field name="as_usuario_final" attrs="{'invisible': [('as_zebra_sale', '=', False)]}"/>
+				<field name="as_usuario_final" attrs="{'invisible': [('as_zebra_sale', '=', False)],'required': [('as_zebra_sale', '=', True)]}"/>
 			</xpath>
 		</field>
 	</record>

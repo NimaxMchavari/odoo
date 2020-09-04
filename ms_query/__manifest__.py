@@ -2,7 +2,7 @@
     "name"          : "Execute Query",
     "version"       : "1.0",
     "author"        : "Miftahussalam",
-    "website"       : "https://miftahussalam.com",
+    "website"       : "https://blog.miftahussalam.com",
     "category"      : "Extra Tools",
     "license"       : "LGPL-3",
     "support"       : "me@miftahussalam.com",
